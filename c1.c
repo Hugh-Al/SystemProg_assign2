@@ -12,16 +12,15 @@ prompts to stderr.
 
 int main(int ac,char**av)
 {
-	//fprintf(stdout, "Please enter the next line of input:\n");
-	 char str[100];
-	 int i;
-	 for(i = 0; i < 5; i++){
-	 	printf( "Enter a value :");
-   gets( str );
-
-   printf( "\nYou entered: ");
-   puts( str );
-	 }
+	
+	char str[100];
+	int i;
+	for(i = 0; i < 3; i++){
+	fprintf(stderr, "Please enter the next line of input:\n");
+	   fgets(str, 100, stdin);
+	   //puts( str );
+	   fprintf(stdout, "%s", str);
+	}
 
    
 

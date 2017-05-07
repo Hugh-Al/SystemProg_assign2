@@ -12,6 +12,12 @@ with a line number prepended (i.e. added to the beginning)
 int main(int ac,char**av)
 {
 
-	/* add your code */
+	char buffer[BUFSIZE], temp[BUFSIZE];
+	int i = 0;
+    while(fgets(buffer, BUFSIZE , stdin) != NULL)
+    {
+    	sprintf(temp, "%d %s", ++i, buffer);
+        fprintf(stdout, "%s", temp);
+    }
 
 }

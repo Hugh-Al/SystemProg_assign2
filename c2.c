@@ -12,6 +12,16 @@ the input to lower case, and writes this to stdout.
 int main(int ac,char**av)
 {
 
-	/* add your code */
+	char buffer[BUFSIZE];
+	int i;
+    while(fgets(buffer, BUFSIZE , stdin) != NULL)
+    {
+    	for(i = 0; buffer[i]; i++){
+  			buffer[i] = tolower(buffer[i]);
+		}
+        fprintf(stdout, "%s", buffer);
+    }
+
+    return 0;
 
 }
