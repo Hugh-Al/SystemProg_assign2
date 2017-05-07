@@ -1,0 +1,8 @@
+a.out
+c1.c
+c2.c
+c3.c
+controller.c
+hello.txt
+makefile
+test.txt
