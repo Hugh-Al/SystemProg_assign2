@@ -1,0 +1,10 @@
+Enter a value :
+You entered: blockagr
+Enter a value :
+You entered: fun
+Enter a value :
+You entered: fire
+Enter a value :
+You entered: save
+Enter a value :
+You entered: rubin
