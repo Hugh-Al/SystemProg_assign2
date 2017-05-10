@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <signal.h>
+
 #define BUFSIZE 256
 
 /*
@@ -12,17 +14,15 @@ prompts to stderr.
 
 int main(int ac,char**av)
 {
-	
 	char str[100];
-	int i;
-	for(i = 0; i < 3; i++){
-	fprintf(stderr, "Please enter the next line of input:\n");
+	do{
+	   fprintf(stderr, "Please enter the next line of input:\n");
 	   fgets(str, 100, stdin);
-	   //puts( str );
-	   fprintf(stdout, "%s", str);
-	}
-
-   
+	   str[strcspn(str, "\n")] = '\0';
+	   if (strcmp(str, "QUIT") != 0){
+		fprintf(stdout, "%s\n", str);
+	   }
+	}while(strcmp(str, "QUIT") != 0);
 
    return 0;
 

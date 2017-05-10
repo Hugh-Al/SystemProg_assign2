@@ -2,65 +2,82 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+//#define oops(m,x) {perror(m); exit(x);}
+void oops(char *s1, char *s2)
+/*
+ *Output the error message and exit
+ */
+
+{
+    fprintf(stderr,"Error: %s ", s1);
+    perror(s2);
+    exit(1);
+}
+
 
 main()
 {
-    //  Create the two pipes
-    int pi[2];
-    pipe(pi);
-    int pi2[2];
+    int pipe1[2];
+    int pipe2[2];
+    int pid, status;
+    int child1, child2, child3;
 
-    //  First child
-    if ( fork() == 0 )
-    {
-        //  Set up the first pipe to be written to
-        //  and close the unneeded pipe endpoints
-        close(pi[0]);
-        dup2(pi[1], 1);
-        close(pi[1]);
-        execlp( "./c1", NULL );
+    if (pipe(pipe1) == -1){
+        oops("Could not create right output pipe", pipe);
     }
 
-    //  Don't open the second pipe until it's needed
-    //  so extra endpoints don't need to be closed
-    pipe(pi2);
-
-    //  Second child
-    if ( fork() == 0 )
-    {
-        //  Set up first pipe to be read from
-        //  and close the unneeded pipe endpoints
-        close(pi[1]);
-        dup2(pi[0], 0);
-        close(pi[0]);
-        //  Set up second pipe to be written to
-        //  and close the unneeded pipe endpoints
-        close(pi2[0]);
-        dup2(pi2[1], 1);
-        close(pi2[1]);
-        execlp( "./c2", NULL );
+    if ((child1 = fork()) == -1){
+	oops("Could not create fork for first child", fork);
+    }
+    if (child1 == 0){       
+        if ((dup2(pipe1[1], 1) == -1)){
+            oops("Could not duplicate pipe", dup);	
+	}
+	if ((close(pipe1[1]) == -1) || (close(pipe1[0]) == -1)){
+	    oops("Could not close pipe", pipe);	
+	}
+        execl( "./c1", "./c1", NULL );
+    }
+    pid = wait(&status);
+    fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
+    if (pipe(pipe2) == -1){
+	oops("Could not create left input pipe", pipe);
     }
 
-    //  Close original pipe endpoints so they aren't
-    //  duplicated into the third child (where they would
-    //  need to be closed).
-    close(pi[1]);
-    close(pi[0]);
+    if ((child2 = fork()) == -1){
+	oops("Could not create fork for second child", fork);
+    }
+    if (child2 == 0){
+        dup2(pipe1[0], 0);
+        close(pipe1[0]);
+        close(pipe1[1]);
+        dup2(pipe2[1], 1);
+        close(pipe2[1]);
+        close(pipe2[0]);
+        execl( "./c2", "./c2", NULL );
+    }
+    close(pipe1[1]);
+    close(pipe1[0]);
+    pid = wait(&status);
+    fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
 
-    //  Third child
-    if ( fork() == 0 )
-    {
-        //  Set up second pipe to be read from
-        //  and close the unneeded pipe endpoints
-        close(pi2[1]);
-        dup2(pi2[0], 0);
-        close(pi2[0]);
-        execlp( "./c3", NULL );
+    if ((child3 = fork()) == -1){
+	oops("Could not create fork for third child", fork);
+    }
+    if (child3 == 0){
+        dup2(pipe2[0], 0);
+        close(pipe2[0]);
+        close(pipe2[1]);
+        execl( "./c3", "./c3", NULL );
     }
 
-    //  Close parent's copy of second pipes
-    close(pi2[1]);
-    close(pi2[0]);
-
-    wait(NULL);
+    close(pipe2[1]);
+    close(pipe2[0]);
+    pid = wait(&status);
+    fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
 }
